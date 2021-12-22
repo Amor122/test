@@ -1,0 +1,48 @@
+celery_worker.sh
+#!/bin/sh 
+case $1 in                                        
+   start) cd /opt/django-celery/ && celery multi start w1 -A  celery_pro -l info;;  # django项目根目录 : /opt/django-celery/
+   stop) cd /opt/django-celery/ && celery multi stop w1 -A  celery_pro -l info;; # django项目根目录 : /opt/django-celery/
+   *) echo "require start|stop" ;;     
+esac
+
+sh celery_worker.sh start # 开启
+sh celery_worker.sh stop # 关闭
+
+celery_beat.sh
+
+#!/bin/sh
+case $1 in  
+   start) cd /opt/django-celery/ && celery -A celery_pro beat -l info >  out.file  2>&1  & ;; # 启动beat ; django项目根目录 : /opt/django-celery/
+esac 
+
+beat_stop.sh
+
+#!/bin/sh               
+PROCESS=`ps -ef|grep celery|grep -v grep|grep -v PPID|awk '{ print $2}'`
+for i in $PROCESS         
+do
+  echo "Kill the $1 process [ $i ]"  
+  kill -9 $i        
+done 
+
+
+
+celery_beat.sh
+
+#!/bin/sh
+case $1 in  
+   start) cd /opt/django-celery/ && celery -A celery_pro beat -l info >  out.file  2>&1  & ;; # 启动beat  ; django项目根目录 : /opt/django-celery/
+   stop) su root /opt/beat_stop.sh start ;; # 关闭beat(根据beat_stop.sh脚本的路径适当变化)
+   *) echo "require start|stop" ;;
+esac 
+后台启动worker, sh celery_worker.sh start
+后台关闭worker, sh celery_worker.sh stop
+后台启动beat, sh celery_beat.sh start
+后台关闭beat, sh celery_beat.sh stop
+
+
+
+
+
+
